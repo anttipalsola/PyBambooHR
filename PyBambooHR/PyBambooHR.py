@@ -357,7 +357,10 @@ class PyBambooHR(object):
             users = {}
             # get all employees (doesn't get whom don't have activity)
             for u in self.get_meta_users().values():
-                users[str(u['employeeId'])] = True if u['status']=='enabled' else False
+                # PyBambooHR.get_employee() fails when employeeID == '0',
+                # so skipping such users altogether:
+                if u['employeeId'] != '0':
+                    users[str(u['employeeId'])] = True if u['status']=='enabled' else False
             # get all enabled employees (included whom don't have activity, but are enabled)
             for u in self.get_employee_directory():
                 users[u['id']] = True
