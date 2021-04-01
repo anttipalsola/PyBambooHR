@@ -512,7 +512,7 @@ class PyBambooHR(object):
 
     def request_custom_report(
             self, field_list, report_format='xls', title="My Custom Report",
-            output_filename=None, last_changed=None):
+            output_filename=None, last_changed=None, only_current=None):
         """
         API method for returning a custom report by field list.
         http://www.bamboohr.com/api/documentation/employees.php#requestCustomReport
@@ -523,6 +523,10 @@ class PyBambooHR(object):
         @param fields: List of report fields
         @param report_format: String of the format to receive the report. (csv, pdf, xls, xml)
         @param output_filename: String (optional) if a filename/location is passed, the results will be saved to disk
+        @param only_current:
+          * True: only include current employmentStatus information
+          * False: include also future hires and employees on notice period
+          * None: omit the parameter from the request (BambooHR API default)
         @return: A result in the format specified. (Will vary depending on format requested.)
         """
         if report_format not in self.report_formats:
@@ -543,8 +547,14 @@ class PyBambooHR(object):
         xml = self._format_report_xml(
             get_fields, title=title, report_format=report_format,
             last_changed=last_changed)
-        url = self.base_url + "reports/custom/?format={0}".format(report_format)
-        r = requests.post(url, timeout=self.timeout, data=xml, headers=self.headers, auth=(self.api_key, ''))
+        url = self.base_url + "reports/custom/"
+
+        params = {'format': report_format, }
+
+        if only_current is not None:
+            params['onlyCurrent'] = str(only_current).lower()
+
+        r = requests.post(url, timeout=self.timeout, data=xml, params=params, headers=self.headers, auth=(self.api_key, ''))
         r.raise_for_status()
 
         if report_format == 'json':
