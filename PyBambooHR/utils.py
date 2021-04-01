@@ -139,15 +139,17 @@ def transform_json_tabular_data(json_input):
     """
     by_employee_id = {}
 
-    for user in json_input:
-        for row in user:
+    for outer_row in json_input:
+        if isinstance(outer_row, dict):
+            outer_row = [outer_row]
+        for inner_row in outer_row:
             try:
-                eid = row.pop('employeeId')
+                eid = inner_row.pop('employeeId')
             except KeyError:
                 continue
-            row['row_id'] = str(row.pop('id'))
+            inner_row['row_id'] = str(inner_row.pop('id'))
 
-            by_employee_id.setdefault(str(eid), []).append(row)
+            by_employee_id.setdefault(str(eid), []).append(inner_row)
 
     return by_employee_id
 
