@@ -547,12 +547,14 @@ class PyBambooHR(object):
         xml = self._format_report_xml(
             get_fields, title=title, report_format=report_format,
             last_changed=last_changed)
-        url = self.base_url + "reports/custom/?format={0}".format(report_format)
+        url = self.base_url + "reports/custom/"
+
+        params = {'format': report_format, }
 
         if only_current is not None:
-            url = url + '&onlyCurrent={0}'.format(str(only_current).lower())
+            params['onlyCurrent'] = str(only_current).lower()
 
-        r = requests.post(url, timeout=self.timeout, data=xml, headers=self.headers, auth=(self.api_key, ''))
+        r = requests.post(url, timeout=self.timeout, data=xml, params=params, headers=self.headers, auth=(self.api_key, ''))
         r.raise_for_status()
 
         if report_format == 'json':
